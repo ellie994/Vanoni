@@ -73,7 +73,7 @@
     .scratch-actions .reset-btn{ min-width:160px; }
 
     #confetti{ position:fixed; inset:0; pointer-events:none; z-index:9999; display:none; }
-    #audioNudge{ position:fixed; left:50%; bottom:18px; transform:translateX(-50%); display:none; z-index:10000; }
+    #audioNudge{ position:fixed; left:50%; bottom:18px; transform:translateX(-50%); display:block; z-index:10000; }
     #audioNudge button{ border:none; padding:10px 16px; border-radius:24px; background:#5a1226; color:#fff; box-shadow:0 12px 24px rgba(0,0,0,.3); cursor:pointer; font-style:italic; }
     #audioNudge button:hover{ transform:translateY(-1px) }
 
@@ -124,20 +124,22 @@
         <div class="main-text" id="prize-text" aria-live="polite"></div>
         <div class="signature">— Ornella, più o meno</div>
       </div>
-      <!-- canvas verrà creato dinamicamente -->
       <div class="foil" aria-hidden="true"></div>
       <div class="hint">Gratta. Ma con sentimento.</div>
     </div>
 
-    <!-- Azioni a lato: Rigratta -->
     <div class="scratch-actions" id="scratchActions" style="display:none">
       <button class="ov-btn reset-btn" onclick="resetScratch()">Rigratta ✨</button>
     </div>
   </div>
 
   <canvas id="confetti"></canvas>
-  <div id="audioNudge"><button onclick="tryPlaySong(true)">▶️ Clicca per far partire la canzone</button></div>
-  <audio id="ornellaSong" src="canzone.mp3" preload="auto" playsinline autoplay></audio>
+
+  <!-- Bottone obbligatorio per audio -->
+  <div id="audioNudge">
+    <button onclick="tryPlaySong(true)">▶️ Clicca per far partire la canzone</button>
+  </div>
+  <audio id="ornellaSong" src="canzone.mp3" preload="auto" playsinline></audio>
 
   <script>
     const qrPage = document.getElementById("qrPage");
@@ -146,6 +148,7 @@
     qrPage.style.display = "flex"; scratchCard.style.display = "none";
     function showScratch(){ qrPage.style.display = "none"; scratchCard.style.display = "block"; scratchActions.style.display = "block"; window.history.replaceState({}, "", window.location.pathname); }
 
+    // Quotes
     const quotes = [
       "“Se non vinci, almeno sei vestita bene.”",
       "“Bevi un caffè, poi drammatizza con dignità.”",
@@ -156,12 +159,10 @@
       "“Quando gratti, fallo come se stessi applaudendo piano.”",
       "“Le aspettative: basse. I tacchi: alti.”",
       "“Il dramma è un accessorio: indossalo bene.”",
-      "“Perdere è un’arte: io la faccio elegante.”",
-      "“La vita è un palco: entra col tuo miglior sorriso.”",
-      "“Se va bene, brindiamo. Se va male, brindiamo meglio.”"
+      "“Perdere è un’arte: io la faccio elegante.”"
     ];
     const qBox = document.getElementById("quotesBox")?.querySelector(".q");
-    if (qBox){ let qi = 0; function rotateQuote(){ qBox.textContent = quotes[qi % quotes.length]; qi++; } rotateQuote(); setInterval(rotateQuote, 3000); }
+    if(qBox){ let qi=0; function rotateQuote(){ qBox.textContent=quotes[qi%quotes.length]; qi++; } rotateQuote(); setInterval(rotateQuote,3000); }
 
     const lossLines = [
       "Non hai vinto nulla. Ma era prevedibile.",
@@ -169,109 +170,79 @@
       "Hai vinto un consiglio: abbina il bordeaux al coraggio.",
       "Premio rimandato. La classe, però, resta.",
       "Niente premio. Solo carattere.",
-      "Perdi, ma con un’ombra impeccabile.",
-      "Vinci la consapevolezza che non si vince.",
-      "Hai perso. Ma guarda che outfit.",
-      "Il destino ha scelto: non tu.",
-      "Premio invisibile. Eleganza visibile.",
-      "Sfortuna cronica, stile iconico.",
-      "Il banco vince. Tu, sorridi.",
-      "Hai vinto una pausa drammatica.",
-      "La ruota gira. Tu resti splendida.",
-      "Perdi. Ma sembri farlo apposta.",
-      "Hai vinto un caffè (te lo offri da sola).",
-      "Nulla di fatto. Tutto di classe.",
-      "Esci senza premio. Entra con grazia.",
-      "Il premio si è perso. Tu no.",
-      "Perdi con la stessa eleganza con cui entri nelle stanze.",
-      "Hai perso? Certo. Hai stile? Ancora di più.",
-      "Premio evaporato. Ironia condensata.",
-      "Non vinci oggi. Ma rubi la scena.",
-      "Hai vinto una scrollata di spalle teatrale.",
-      "Perdi sempre. Eppure, che presenza.",
-      "Zero premi, mille sguardi.",
-      "Hai perso. L’eyeliner, invece, regge.",
-      "Niente da dichiarare, se non il tuo carisma.",
-      "La fortuna era in pausa. Tu in primo piano.",
-      "Perdi, ma a capo alto."
+      "Perdi, ma con un’ombra impeccabile."
     ];
     const prizeText = document.getElementById("prize-text");
     function setRandomLoss(){ prizeText.innerText = lossLines[Math.floor(Math.random()*lossLines.length)]; }
 
-    // --- Scratch engine (ri-creabile) ---
-    let canvas = null, ctx = null, scratching = false;
-
+    // Scratch engine
+    let canvas=null, ctx=null, scratching=false;
     function createScratchCanvas(){
-      // rimuovi eventuale canvas esistente
       const existing = document.getElementById('scratch');
-      if (existing) existing.remove();
-
-      // crea nuovo canvas e inseriscilo prima del foil
-      canvas = document.createElement('canvas');
-      canvas.id = 'scratch';
-      canvas.style.position = 'absolute';
-      canvas.style.inset = '0';
-      canvas.style.cursor = 'grab';
+      if(existing) existing.remove();
+      canvas=document.createElement('canvas');
+      canvas.id='scratch';
+      canvas.style.position='absolute';
+      canvas.style.inset='0';
+      canvas.style.cursor='grab';
       const foil = scratchCard.querySelector('.foil');
       scratchCard.insertBefore(canvas, foil);
-
-      ctx = canvas.getContext('2d', { willReadFrequently:true });
+      ctx=canvas.getContext('2d', { willReadFrequently:true });
       bindScratchEvents();
       resizeCanvas();
     }
-
     function bindScratchEvents(){
-      canvas.addEventListener('pointerdown', ()=> scratching = true);
-      canvas.addEventListener('pointerup',   ()=> scratching = false);
-      canvas.addEventListener('pointerleave',()=> scratching = false);
-      canvas.addEventListener('pointermove', e => {
-        if (!scratching) return;
-        const r = canvas.getBoundingClientRect();
-        scratch(e.clientX - r.left, e.clientY - r.top);
-        if (getScratchedPercent() > 60) { removeScratchLayer(); }
+      canvas.addEventListener('pointerdown', ()=>scratching=true);
+      canvas.addEventListener('pointerup', ()=>scratching=false);
+      canvas.addEventListener('pointerleave', ()=>scratching=false);
+      canvas.addEventListener('pointermove', e=>{
+        if(!scratching) return;
+        const r=canvas.getBoundingClientRect();
+        scratch(e.clientX-r.left, e.clientY-r.top);
+        if(getScratchedPercent()>60){ removeScratchLayer(); }
       });
     }
-
     function resizeCanvas(){
-      if (!canvas) return;
-      const rect = scratchCard.getBoundingClientRect();
-      canvas.width = rect.width; canvas.height = rect.height;
-      const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-      grad.addColorStop(0, '#bfbfbf'); grad.addColorStop(.5, '#d9d9d9'); grad.addColorStop(1, '#a6a6a6');
-      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.save(); ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.font = 'italic 16px Georgia'; ctx.textAlign = 'center'; ctx.fillText('Gratta qui ✨', canvas.width/2, canvas.height/2); ctx.restore();
+      if(!canvas) return;
+      const rect=scratchCard.getBoundingClientRect();
+      canvas.width=rect.width; canvas.height=rect.height;
+      const grad=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+      grad.addColorStop(0,'#bfbfbf'); grad.addColorStop(.5,'#d9d9d9'); grad.addColorStop(1,'#a6a6a6');
+      ctx.globalCompositeOperation='source-over'; ctx.fillStyle=grad; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.globalCompositeOperation='destination-out';
+      ctx.save(); ctx.globalCompositeOperation='source-atop'; ctx.fillStyle='rgba(0,0,0,.25)'; ctx.font='italic 16px Georgia'; ctx.textAlign='center'; ctx.fillText('Gratta qui ✨', canvas.width/2, canvas.height/2); ctx.restore();
     }
     function scratch(x,y){ ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.fill(); }
-    function getScratchedPercent(){ const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data; let t=0; for(let i=3;i<pixels.length;i+=4){ if(pixels[i]===0) t++; } return (t/(pixels.length/4))*100; }
-    function removeScratchLayer(){ if(canvas){ canvas.remove(); } triggerConfetti(1200); }
+    function getScratchedPercent(){ const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data; let t=0; for(let i=3;i<pixels.length;i+=4){ if(pixels[i]===0) t++; } return (t/(pixels.length/4))*100; }
+    function removeScratchLayer(){ if(canvas) canvas.remove(); triggerConfetti(1200); }
 
-    // --- Rigratta ---
-    function resetScratch(){
-      setRandomLoss();        // nuovo “premio”
-      createScratchCanvas();  // ricrea la patina grattabile
-    }
-    window.resetScratch = resetScratch; // esponi globalmente per onclick
+    function resetScratch(){ setRandomLoss(); createScratchCanvas(); }
+    window.resetScratch = resetScratch;
 
-    // Inizializza quando appare il gratta e vinci
     const initObserver = new IntersectionObserver((entries)=>{
       entries.forEach(e=>{ if(e.isIntersecting){ setRandomLoss(); createScratchCanvas(); initObserver.disconnect(); } });
     });
     initObserver.observe(scratchCard);
-
     window.addEventListener('resize', resizeCanvas);
 
-    // --- Confetti ---
-    const cf = document.getElementById('confetti'); const cfx = cf.getContext('2d'); let confettiPieces=[];
-    function makeConfetti(n){ const W = cf.width=innerWidth; const H = cf.height=innerHeight; confettiPieces = Array.from({length:n},()=>({ x:Math.random()*W, y:-20-Math.random()*H*0.3, s:5+Math.random()*6, r:Math.random()*360, v:2+Math.random()*3, col:`hsl(${Math.floor(Math.random()*360)},85%,60%)` })); }
+    // Confetti
+    const cf=document.getElementById('confetti'); const cfx=cf.getContext('2d'); let confettiPieces=[];
+    function makeConfetti(n){ const W=cf.width=innerWidth; const H=cf.height=innerHeight; confettiPieces=Array.from({length:n},()=>({ x:Math.random()*W, y:-20-Math.random()*H*0.3, s:5+Math.random()*6, r:Math.random()*360, v:2+Math.random()*3, col:`hsl(${Math.floor(Math.random()*360)},85%,60%)`})); }
     function drawConfetti(){ cfx.clearRect(0,0,cf.width,cf.height); confettiPieces.forEach(p=>{ cfx.save(); cfx.translate(p.x,p.y); cfx.rotate(p.r*Math.PI/180); cfx.fillStyle=p.col; cfx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); cfx.restore(); p.y+=p.v; p.r+=6; }); }
-    let confettiTimer, confettiAnim; function triggerConfetti(ms=1500){ cf.style.display='block'; makeConfetti(140); function loop(){ drawConfetti(); confettiAnim = requestAnimationFrame(loop); } loop(); clearTimeout(confettiTimer); confettiTimer = setTimeout(()=>{ cancelAnimationFrame(confettiAnim); cf.style.display='none'; }, ms); }
+    let confettiTimer, confettiAnim;
+    function triggerConfetti(ms=1500){ cf.style.display='block'; makeConfetti(140); function loop(){ drawConfetti(); confettiAnim=requestAnimationFrame(loop); } loop(); clearTimeout(confettiTimer); confettiTimer=setTimeout(()=>{ cancelAnimationFrame(confettiAnim); cf.style.display='none'; }, ms); }
 
-    // --- AUDIO: parte appena entri ---
+    // Audio
     const audio = document.getElementById('ornellaSong');
     const nudge = document.getElementById('audioNudge');
-    function tryPlaySong(force){ if(!audio || !audio.src) return; audio.muted = false; audio.currentTime = 0; const playPromise = audio.play(); if(playPromise && typeof playPromise.then === 'function'){ playPromise.then(()=>{ nudge.style.display = 'none'; }).catch(()=>{ if(force){ tryPlaySong(); } else { nudge.style.display = 'block'; } }); } }
-    window.addEventListener('load', ()=>{ tryPlaySong(); });
+    function tryPlaySong(force=false){
+      if(!audio || !audio.src) return;
+      audio.muted=false; audio.currentTime=0;
+      const playPromise=audio.play();
+      if(playPromise && typeof playPromise.then==='function'){
+        playPromise.then(()=>{ nudge.style.display='none'; }).catch(()=>{ if(force){ tryPlaySong(); } else { nudge.style.display='block'; } });
+      }
+    }
   </script>
 </body>
 </html>
