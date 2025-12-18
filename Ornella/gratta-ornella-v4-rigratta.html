@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gratta e Vinci – Ornella Edition (Autoplay + Immagini + Rigratta)</title>
+  <style>
+    :root{ --bordeaux:#5a1226; --vino:#3c0b18; --oro:#e0b870; --oro-chiaro:#f7e7c4; --crema:#fff8ec; --ombra:rgba(0,0,0,.35); }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(224,184,112,.25), transparent 60%),
+        radial-gradient(circle at 20% 10%, #7b1f3c, transparent 35%),
+        radial-gradient(circle at 80% 0%, #2a0813, transparent 40%),
+        linear-gradient(180deg, #120308 0%, #1a0610 40%, #0d0409 100%);
+      font-family: "Georgia","Times New Roman", serif; color:#2b0d05;
+    }
+
+    .qr-page{ min-height:100vh; width:100%; display:flex; justify-content:center; align-items:center; padding:42px 20px;
+      background: linear-gradient(180deg, #f9e6c8, #e0b870 130%), radial-gradient(1200px 600px at 50% -10%, rgba(0,0,0,.05), transparent 60%);
+      animation: fadeIn .9s ease; position:relative; overflow:hidden; }
+    .curtain{ position:absolute; inset:-10% -5% -15% -5%; background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 6px, transparent 6px 12px),
+      radial-gradient(150% 100% at 50% -10%, rgba(255,255,255,.06), transparent 60%),
+      linear-gradient(120deg, #7f1c39, #5a1226 55%, #3c0b18);
+      filter:saturate(110%) contrast(105%); opacity:.35; z-index:0; }
+    .qr-card{ max-width:980px; width:100%; margin:auto; padding:34px; border-radius:36px; background:var(--crema);
+      box-shadow:0 45px 100px var(--ombra); position:relative; z-index:1; display:grid; grid-template-columns:1.1fr .9fr; gap:28px; }
+    @media (max-width:880px){ .qr-card{ grid-template-columns:1fr; padding:28px } }
+    .ribbon{ position:absolute; top:-18px; left:50%; transform:translateX(-50%); padding:7px 18px; border-radius:20px; background:var(--bordeaux);
+      color:#fff; font-size:12px; letter-spacing:2px; box-shadow:0 10px 18px rgba(0,0,0,.25); text-transform:uppercase; }
+    .ov-title{ margin:6px 0 8px; font-size:clamp(32px,5vw,56px); line-height:1.1; font-weight:900; background:linear-gradient(180deg,#3a0e19,#8b2b4e 35%,#3a0e19 70%);
+      -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 2px 0 rgba(255,255,255,.2); }
+    .intro{ font-size:18px; line-height:1.7; color:#3a1c0e; margin:10px 0 12px; }
+    .cta{ font-size:20px; font-style:italic; margin:12px 0 22px; color:#5a1226; }
+    .ov-btn{ border:none; outline:none; cursor:pointer; padding:14px 26px; border-radius:32px; font-size:16px; font-style:italic; color:#fff;
+      background: linear-gradient(180deg,#7f1c39,#5a1226 55%,#3c0b18); box-shadow:0 16px 30px rgba(90,18,38,.35), inset 0 1px 0 rgba(255,255,255,.25);
+      transform:translateY(0); transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+    .ov-btn:hover{ transform:translateY(-2px); box-shadow:0 20px 36px rgba(0,0,0,.35); filter:saturate(110%) }
+    .ov-btn:active{ transform:translateY(0) scale(.99) }
+
+    .ov-collage{ position:relative; min-height:260px; display:flex; justify-content:center; align-items:center; padding:16px; }
+    .polaroid{ position:absolute; width:42%; background:#fff; padding:10px 10px 24px; border-radius:8px; box-shadow:0 18px 30px rgba(0,0,0,.25);
+      transform-origin:center; transition: transform .3s ease, filter .3s ease; filter:saturate(108%) contrast(102%); }
+    .polaroid img{ width:100%; height:210px; object-fit:cover; display:block; border-radius:6px }
+    @media (max-width:880px){ .polaroid img{ height:180px } }
+    .polaroid small{ display:block; text-align:center; margin-top:8px; font-style:italic; color:#6b2a3b }
+    .polaroid:hover{ transform: scale(1.03) rotate(var(--rot)); z-index:3 }
+    .p1{ --rot:-8deg; left:2%; top:12% } .p2{ --rot:6deg; right:5%; top:4% } .p3{ --rot:-2deg; left:20%; bottom:-4% }
+
+    .ov-quotes{ margin-top:10px; padding:12px 14px; border:2px dashed rgba(90,18,38,.35); border-radius:16px; background:linear-gradient(180deg,#fffdf8,#fff9ef);
+      color:#5a1226; font-style:italic; min-height:70px; display:flex; align-items:center; }
+    .ov-quotes .sig{ font-family:cursive; font-size:20px; color:#8b2b4e; margin-left:8px; }
+
+    /* --- Gratta + azioni --- */
+    .wrap-scratch{ display:flex; justify-content:center; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+    .card{ position:relative; width:360px; height:220px; border-radius:28px; background:linear-gradient(135deg,var(--oro-chiaro),var(--oro));
+      box-shadow:0 30px 60px rgba(0,0,0,.6); overflow:hidden; border:3px solid rgba(0,0,0,.15); }
+    .card::before{ content:""; position:absolute; inset:0; background:repeating-linear-gradient(45deg, rgba(255,255,255,.15), rgba(255,255,255,.15) 10px, transparent 10px, transparent 20px); pointer-events:none; }
+    .header{ position:absolute; top:10px; width:100%; text-align:center; font-weight:800; letter-spacing:2px; font-size:14px; color:#56162b; text-shadow:0 1px 0 rgba(255,255,255,.6); }
+    .prize{ height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:24px; font-size:20px; font-weight:600; color:#3a1c0e; letter-spacing:.5px; }
+    .title{ font-size:14px; font-style:italic; opacity:.8; margin-bottom:6px; }
+    .main-text{ font-size:22px; font-weight:800; line-height:1.2; }
+    .signature{ margin-top:10px; font-size:13px; font-style:italic; opacity:.7; }
+    canvas#scratch{ position:absolute; inset:0; cursor:grab; }
+    .hint{ position:absolute; bottom:10px; width:100%; text-align:center; font-size:12px; font-style:italic; opacity:.75; color:#3a1c0e; }
+    .foil{ position:absolute; inset:0; pointer-events:none; mix-blend-mode:overlay; opacity:.3; background:
+      linear-gradient(115deg, rgba(255,255,255,.35), rgba(200,200,200,.2) 40%, rgba(255,255,255,.5) 60%, rgba(150,150,150,.2)); animation: shimmer 3.5s linear infinite; }
+
+    .scratch-actions{ display:none; }
+    .scratch-actions .reset-btn{ min-width:160px; }
+
+    #confetti{ position:fixed; inset:0; pointer-events:none; z-index:9999; display:none; }
+    #audioNudge{ position:fixed; left:50%; bottom:18px; transform:translateX(-50%); display:none; z-index:10000; }
+    #audioNudge button{ border:none; padding:10px 16px; border-radius:24px; background:#5a1226; color:#fff; box-shadow:0 12px 24px rgba(0,0,0,.3); cursor:pointer; font-style:italic; }
+    #audioNudge button:hover{ transform:translateY(-1px) }
+
+    @keyframes shimmer{ 0%{ filter:hue-rotate(0); opacity:.25 } 50%{ filter:hue-rotate(25deg); opacity:.4 } 100%{ filter:hue-rotate(0); opacity:.25 } }
+    @keyframes fadeIn{ from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
+  </style>
+</head>
+<body>
+
+  <div class="qr-page" id="qrPage" style="display:flex">
+    <div class="curtain" aria-hidden="true"></div>
+    <div class="qr-card">
+      <div style="display:flex; flex-direction:column; justify-content:center">
+        <div class="ribbon">BUONO EMOTIVO</div>
+        <h1 class="ov-title">Ciao Arianna</h1>
+        <p class="intro">Sono Ornella.<br/>Questo è un buono per riportarmi in vita — con classe e autoironia. Tu, nel dubbio, drammatizza bene.</p>
+        <div class="ov-quotes" id="quotesBox" aria-live="polite"><span class="q"></span><span class="sig">— Ornella (spirito guida)</span></div>
+        <p class="cta">Pronta? Gratta con sentimento… e aspettative basse.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap">
+          <button class="ov-btn" onclick="showScratch()">Procediamo, va.</button>
+          <button class="ov-btn" style="background:linear-gradient(180deg,#be9556,#a87b3f 55%,#8b6a36)" onclick="window.location.search='';">Vai subito al Gratta e Vinci</button>
+        </div>
+      </div>
+      <!-- Collage foto: usa 1.jpg 2.jpg 3.jpg -->
+      <div class="ov-collage" aria-label="Collage fotografico in stile Ornella">
+        <figure class="polaroid p1">
+          <img src="1.jpg" alt="Ornella – foto 1" loading="lazy">
+          <small>“Metti il rossetto e il coraggio.”</small>
+        </figure>
+        <figure class="polaroid p2">
+          <img src="2.jpg" alt="Ornella – foto 2" loading="lazy">
+          <small>“La classe non va a dormire.”</small>
+        </figure>
+        <figure class="polaroid p3">
+          <img src="3.jpg" alt="Ornella – foto 3" loading="lazy">
+          <small>“Dramma? Solo se sta bene con l’outfit.”</small>
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gratta e Vinci + azioni laterali -->
+  <div class="wrap-scratch" id="scratchWrap">
+    <div class="card" id="scratchCard" style="display:none">
+      <div class="header">SUPER ORNELLA</div>
+      <div class="prize" id="prize">
+        <div class="title">Biglietto emotivamente impegnativo</div>
+        <div class="main-text" id="prize-text" aria-live="polite"></div>
+        <div class="signature">— Ornella, più o meno</div>
+      </div>
+      <!-- canvas verrà creato dinamicamente -->
+      <div class="foil" aria-hidden="true"></div>
+      <div class="hint">Gratta. Ma con sentimento.</div>
+    </div>
+
+    <!-- Azioni a lato: Rigratta -->
+    <div class="scratch-actions" id="scratchActions" style="display:none">
+      <button class="ov-btn reset-btn" onclick="resetScratch()">Rigratta ✨</button>
+    </div>
+  </div>
+
+  <canvas id="confetti"></canvas>
+  <div id="audioNudge"><button onclick="tryPlaySong(true)">▶️ Clicca per far partire la canzone</button></div>
+  <audio id="ornellaSong" src="Ornella%20Vanoni%20-%20La%20voglia,%20la%20pazzia.mp3" preload="auto" playsinline autoplay></audio>
+
+  <script>
+    const qrPage = document.getElementById("qrPage");
+    const scratchCard = document.getElementById("scratchCard");
+    const scratchActions = document.getElementById("scratchActions");
+    qrPage.style.display = "flex"; scratchCard.style.display = "none";
+    function showScratch(){ qrPage.style.display = "none"; scratchCard.style.display = "block"; scratchActions.style.display = "block"; window.history.replaceState({}, "", window.location.pathname); }
+
+    const quotes = [
+      "“Se non vinci, almeno sei vestita bene.”",
+      "“Bevi un caffè, poi drammatizza con dignità.”",
+      "“La fortuna è timida: abituati a farle cenno.”",
+      "“La classe non si scorda. Il resto, sì.”",
+      "“Se ti va male, fai finta sia una scelta di stile.”",
+      "“Non tutte le luci sono di scena. Alcune sono del frigorifero.”",
+      "“Quando gratti, fallo come se stessi applaudendo piano.”",
+      "“Le aspettative: basse. I tacchi: alti.”",
+      "“Il dramma è un accessorio: indossalo bene.”",
+      "“Perdere è un’arte: io la faccio elegante.”",
+      "“La vita è un palco: entra col tuo miglior sorriso.”",
+      "“Se va bene, brindiamo. Se va male, brindiamo meglio.”"
+    ];
+    const qBox = document.getElementById("quotesBox")?.querySelector(".q");
+    if (qBox){ let qi = 0; function rotateQuote(){ qBox.textContent = quotes[qi % quotes.length]; qi++; } rotateQuote(); setInterval(rotateQuote, 3000); }
+
+    const lossLines = [
+      "Non hai vinto nulla. Ma era prevedibile.",
+      "Oggi perdi. Domani… anche.",
+      "Hai vinto un consiglio: abbina il bordeaux al coraggio.",
+      "Premio rimandato. La classe, però, resta.",
+      "Niente premio. Solo carattere.",
+      "Perdi, ma con un’ombra impeccabile.",
+      "Vinci la consapevolezza che non si vince.",
+      "Hai perso. Ma guarda che outfit.",
+      "Il destino ha scelto: non tu.",
+      "Premio invisibile. Eleganza visibile.",
+      "Sfortuna cronica, stile iconico.",
+      "Il banco vince. Tu, sorridi.",
+      "Hai vinto una pausa drammatica.",
+      "La ruota gira. Tu resti splendida.",
+      "Perdi. Ma sembri farlo apposta.",
+      "Hai vinto un caffè (te lo offri da sola).",
+      "Nulla di fatto. Tutto di classe.",
+      "Esci senza premio. Entra con grazia.",
+      "Il premio si è perso. Tu no.",
+      "Perdi con la stessa eleganza con cui entri nelle stanze.",
+      "Hai perso? Certo. Hai stile? Ancora di più.",
+      "Premio evaporato. Ironia condensata.",
+      "Non vinci oggi. Ma rubi la scena.",
+      "Hai vinto una scrollata di spalle teatrale.",
+      "Perdi sempre. Eppure, che presenza.",
+      "Zero premi, mille sguardi.",
+      "Hai perso. L’eyeliner, invece, regge.",
+      "Niente da dichiarare, se non il tuo carisma.",
+      "La fortuna era in pausa. Tu in primo piano.",
+      "Perdi, ma a capo alto."
+    ];
+    const prizeText = document.getElementById("prize-text");
+    function setRandomLoss(){ prizeText.innerText = lossLines[Math.floor(Math.random()*lossLines.length)]; }
+
+    // --- Scratch engine (ri-creabile) ---
+    let canvas = null, ctx = null, scratching = false;
+
+    function createScratchCanvas(){
+      // rimuovi eventuale canvas esistente
+      const existing = document.getElementById('scratch');
+      if (existing) existing.remove();
+
+      // crea nuovo canvas e inseriscilo prima del foil
+      canvas = document.createElement('canvas');
+      canvas.id = 'scratch';
+      canvas.style.position = 'absolute';
+      canvas.style.inset = '0';
+      canvas.style.cursor = 'grab';
+      const foil = scratchCard.querySelector('.foil');
+      scratchCard.insertBefore(canvas, foil);
+
+      ctx = canvas.getContext('2d', { willReadFrequently:true });
+      bindScratchEvents();
+      resizeCanvas();
+    }
+
+    function bindScratchEvents(){
+      canvas.addEventListener('pointerdown', ()=> scratching = true);
+      canvas.addEventListener('pointerup',   ()=> scratching = false);
+      canvas.addEventListener('pointerleave',()=> scratching = false);
+      canvas.addEventListener('pointermove', e => {
+        if (!scratching) return;
+        const r = canvas.getBoundingClientRect();
+        scratch(e.clientX - r.left, e.clientY - r.top);
+        if (getScratchedPercent() > 60) { removeScratchLayer(); }
+      });
+    }
+
+    function resizeCanvas(){
+      if (!canvas) return;
+      const rect = scratchCard.getBoundingClientRect();
+      canvas.width = rect.width; canvas.height = rect.height;
+      const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+      grad.addColorStop(0, '#bfbfbf'); grad.addColorStop(.5, '#d9d9d9'); grad.addColorStop(1, '#a6a6a6');
+      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.save(); ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.font = 'italic 16px Georgia'; ctx.textAlign = 'center'; ctx.fillText('Gratta qui ✨', canvas.width/2, canvas.height/2); ctx.restore();
+    }
+    function scratch(x,y){ ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.fill(); }
+    function getScratchedPercent(){ const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data; let t=0; for(let i=3;i<pixels.length;i+=4){ if(pixels[i]===0) t++; } return (t/(pixels.length/4))*100; }
+    function removeScratchLayer(){ if(canvas){ canvas.remove(); } triggerConfetti(1200); }
+
+    // --- Rigratta ---
+    function resetScratch(){
+      setRandomLoss();        // nuovo “premio”
+      createScratchCanvas();  // ricrea la patina grattabile
+    }
+    window.resetScratch = resetScratch; // esponi globalmente per onclick
+
+    // Inizializza quando appare il gratta e vinci
+    const initObserver = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ setRandomLoss(); createScratchCanvas(); initObserver.disconnect(); } });
+    });
+    initObserver.observe(scratchCard);
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // --- Confetti ---
+    const cf = document.getElementById('confetti'); const cfx = cf.getContext('2d'); let confettiPieces=[];
+    function makeConfetti(n){ const W = cf.width=innerWidth; const H = cf.height=innerHeight; confettiPieces = Array.from({length:n},()=>({ x:Math.random()*W, y:-20-Math.random()*H*0.3, s:5+Math.random()*6, r:Math.random()*360, v:2+Math.random()*3, col:`hsl(${Math.floor(Math.random()*360)},85%,60%)` })); }
+    function drawConfetti(){ cfx.clearRect(0,0,cf.width,cf.height); confettiPieces.forEach(p=>{ cfx.save(); cfx.translate(p.x,p.y); cfx.rotate(p.r*Math.PI/180); cfx.fillStyle=p.col; cfx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); cfx.restore(); p.y+=p.v; p.r+=6; }); }
+    let confettiTimer, confettiAnim; function triggerConfetti(ms=1500){ cf.style.display='block'; makeConfetti(140); function loop(){ drawConfetti(); confettiAnim = requestAnimationFrame(loop); } loop(); clearTimeout(confettiTimer); confettiTimer = setTimeout(()=>{ cancelAnimationFrame(confettiAnim); cf.style.display='none'; }, ms); }
+
+    // --- AUDIO: parte appena entri ---
+    const audio = document.getElementById('ornellaSong');
+    const nudge = document.getElementById('audioNudge');
+    function tryPlaySong(force){ if(!audio || !audio.src) return; audio.muted = false; audio.currentTime = 0; const playPromise = audio.play(); if(playPromise && typeof playPromise.then === 'function'){ playPromise.then(()=>{ nudge.style.display = 'none'; }).catch(()=>{ if(force){ tryPlaySong(); } else { nudge.style.display = 'block'; } }); } }
+    window.addEventListener('load', ()=>{ tryPlaySong(); });
+  </script>
+</body>
+</html>
